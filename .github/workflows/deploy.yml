@@ -1,29 +1,22 @@
-name: Deploy React to DO
+name: Deploy React
 
 on:
   push:
-    branches: ["master"]
+    branches: [ master ]
 
 jobs:
-  build-and-deploy:
+  build-deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
+      - uses: actions/checkout@v3
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: yarn
 
       - name: Build React app
-        run: npm run build
+        run: yarn build
 
-      - name: Copy files to server
+      - name: Deploy to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_IP }}
@@ -31,12 +24,3 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           source: "build/*"
           target: "/home/root/wedding/build"
-
-      - name: Restart Nginx
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_IP }}
-          username: root
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            systemctl restart nginx
