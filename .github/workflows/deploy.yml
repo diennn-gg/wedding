@@ -22,5 +22,7 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: root
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "build/*"
-          target: "/home/root/wedding/build"
+          source: "build/"
+          target: "/home/root/wedding/"
+          strip_components: 1
+          overwrite: true
