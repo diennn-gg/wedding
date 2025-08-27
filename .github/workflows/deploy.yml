@@ -26,7 +26,7 @@ jobs:
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USER }}
+          username: root
           key: ${{ secrets.SERVER_SSH_KEY }}
           source: "build/*"
           target: "/var/www/html/"
