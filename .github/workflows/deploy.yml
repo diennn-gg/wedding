@@ -29,6 +29,6 @@ jobs:
           username: root
           key: ${{ secrets.SERVER_SSH_KEY }}
           source: "build/*"
-          target: "/me/root/weeding/build"
+          target: "/home/root/weeding/build"
           strip_components: 1
           overwrite: true
