@@ -33,25 +33,27 @@ jobs:
           strip_components: 0
           overwrite: true
 
-      - name: Setup directory permissions and install dependencies
+      - name: Clean server directory and sync files
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_IP }}
           username: root
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
+            # Create directory if it doesn't exist
             mkdir -p /home/root/wedding
             
+            # Set full permissions for the directory
             chmod 755 /home/root/wedding
             chown -R root:root /home/root/wedding
             
-            # Di chuyển vào thư mục
             cd /home/root/wedding
             
-            echo "Current directory: $(pwd)"
-            echo "Directory permissions:"
-            ls -ld /home/root/wedding
-            echo "Files in directory:"
+            echo "Cleaning old files..."
+            # Remove all old files (except node_modules if exists)
+            find . -maxdepth 1 -not -name '.' -not -name 'node_modules' -exec rm -rf {} +
+            
+            echo "Files after cleaning:"
             ls -la
             
             echo "Installing production dependencies..."
