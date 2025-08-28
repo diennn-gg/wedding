@@ -16,57 +16,37 @@ jobs:
           node-version: '18'
           cache: 'yarn'
 
-      - name: Install dependencies for development
-        run: yarn
-
-      - name: Build React app
-        run: yarn build
-
       - name: Deploy to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_IP }}
           username: root
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "."
+          source: "src/"
           target: "/home/root/wedding"
           strip_components: 0
           overwrite: true
 
-      - name: Clean server directory and sync files
+      - name: Update source code and restart service
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_IP }}
           username: root
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            # Create directory if it doesn't exist
-            mkdir -p /home/root/wedding
-            
-            # Set full permissions for the directory
-            chmod 755 /home/root/wedding
-            chown -R root:root /home/root/wedding
-            
             cd /home/root/wedding
             
-            echo "Cleaning old files..."
-            # Remove old source files but keep important production files
-            rm -rf src/ 
+            echo "Current files in src/:"
+            ls -la src/
             
-            echo "Files after cleaning:"
-            ls -la
+            echo "Building new version..."
+            yarn build
             
-            echo "Installing production dependencies..."
-            yarn install --production --frozen-lockfile
-            
-            echo "Dependencies installed. Checking node_modules:"
-            ls -la node_modules | head -10
-            
-            echo "Setting proper permissions for node_modules..."
-            chmod -R 755 node_modules
+            echo "New build created. Checking build folder:"
+            ls -la build/
             
             echo "Restarting service..."
-            pm2 restart ecosystem.config.js || pm2 start ecosystem.config.js
+            pm2 restart ecosystem.config.js
             
             echo "Service status:"
             pm2 status
