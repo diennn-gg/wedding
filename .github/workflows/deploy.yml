@@ -16,7 +16,7 @@ jobs:
           node-version: '18'
           cache: 'yarn'
 
-      - name: Install dependencies
+      - name: Install dependencies for development
         run: yarn
 
       - name: Build React app
@@ -28,17 +28,48 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: root
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "build/*"
-          target: "/home/root/wedding/build"
-          strip_components: 1
+          source: |
+            build/
+            package.json
+            yarn.lock
+            server.js
+            ecosystem.config.js
+          target: "/home/root/wedding"
+          strip_components: 0
           overwrite: true
 
-      - name: Restart service
+      - name: Setup directory permissions and install dependencies
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_IP }}
           username: root
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
+            mkdir -p /home/root/wedding
+            
+            chmod 755 /home/root/wedding
+            chown -R root:root /home/root/wedding
+            
+            # Di chuyển vào thư mục
             cd /home/root/wedding
+            
+            echo "Current directory: $(pwd)"
+            echo "Directory permissions:"
+            ls -ld /home/root/wedding
+            echo "Files in directory:"
+            ls -la
+            
+            echo "Installing production dependencies..."
+            yarn install --production --frozen-lockfile
+            
+            echo "Dependencies installed. Checking node_modules:"
+            ls -la node_modules | head -10
+            
+            echo "Setting proper permissions for node_modules..."
+            chmod -R 755 node_modules
+            
+            echo "Restarting service..."
             pm2 restart ecosystem.config.js || pm2 start ecosystem.config.js
+            
+            echo "Service status:"
+            pm2 status
