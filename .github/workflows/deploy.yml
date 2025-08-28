@@ -28,12 +28,7 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: root
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: |
-            build/
-            package.json
-            yarn.lock
-            server.js
-            ecosystem.config.js
+          source: "."
           target: "/home/root/wedding"
           strip_components: 0
           overwrite: true
