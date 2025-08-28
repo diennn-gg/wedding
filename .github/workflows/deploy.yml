@@ -22,12 +22,12 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: root
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "src/"
+          source: "."
           target: "/home/root/wedding"
           strip_components: 0
           overwrite: true
 
-      - name: Update source code and restart service
+      - name: Build and restart service
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_IP }}
@@ -36,8 +36,11 @@ jobs:
           script: |
             cd /home/root/wedding
             
-            echo "Current files in src/:"
-            ls -la src/
+            echo "All files copied from GitHub:"
+            ls -la
+            
+            echo "Installing production dependencies..."
+            yarn
             
             echo "Building new version..."
             yarn build
